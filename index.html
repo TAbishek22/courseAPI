@@ -1,0 +1,123 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Student Task Manager</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <div class="box2">
+            <h1>Student Task Manager</h1>
+            <form id="taskForm">
+                <label for="courseId">Course ID:</label>
+                <input
+                    type="number"
+                    id="courseId"
+                    name="courseId"
+                    required
+                /><br />
+                <label for="taskName">Task Name:</label>
+                <input
+                    type="text"
+                    id="taskName"
+                    name="taskName"
+                    required
+                /><br />
+                <label for="dueDate">Due Date:</label>
+                <input type="date" id="dueDate" name="dueDate" required /><br />
+                <label for="details">Details:</label>
+                <textarea id="details" name="details"></textarea><br />
+                <button type="submit">Add Task</button>
+            </form>
+            <h2>Enter a courseID Number to search task</h2>
+            <input
+                id="task"
+                type="number"
+                name=""
+                id=""
+                onchange="fun(this.value)"
+            />
+            <table id="table2" border="1">
+                <thead>
+                    <tr id="ow">
+                        <th>Task Name</th>
+                        <th class="two">Description</th>
+                        <th class="two">Due Date</th>
+                    </tr>
+                    <tr></tr>
+                </thead>
+            </table>
+            <button id="hello">Search</button>
+        </div>
+        <script>
+            // script.js
+            document
+                .getElementById("taskForm")
+                .addEventListener("submit", async function (event) {
+                    event.preventDefault();
+
+                    const courseId = document.getElementById("courseId").value;
+                    const taskName = document.getElementById("taskName").value;
+                    const dueDate = document.getElementById("dueDate").value;
+                    const details = document.getElementById("details").value;
+
+                    const response = await fetch(
+                        `http://localhost:3000/courses`,
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                                courseId: courseId,
+                                taskName: taskName,
+                                dueDate: dueDate,
+                                details: details,
+                            }),
+                        }
+                    );
+                    if (response.ok) {
+                        console.log("Task added successfully!");
+                        document.getElementById("taskForm").reset();
+                    } else {
+                        console.error("Failed to add task.");
+                    }
+                });
+
+            let data = "";
+            const task = document.getElementById("task");
+            function fun(e) {
+                data = e;
+            }
+            const button = document.getElementById("hello");
+            const row = document.createElement("tr");
+            row.innerHTML = "";
+            button.addEventListener("click", async () => {
+                try {
+                    const table = document.getElementById("table2");
+                    console.log("Hello", data);
+                    task.value = "";
+                    const res2 = await fetch(
+                        `http://localhost:3000/courses/${data}`
+                    );
+                    const response = await res2.json();
+                    const data2 = response;
+                    <!-- const row = document.createElement("tr"); -->
+                    row.innerHTML = `
+                        <td>${data2.taskName}</td>
+                        <td>${data2.details}</td>
+                        <td>${data2.dueDate}</td>`;
+                    table.appendChild(row);
+                } catch (e) {
+                    const table = document.getElementById("table2");
+                    task.value = "";
+                    row.innerHTML = `
+                        <td>Task Not found because : ${e}</td>`;
+                    table.appendChild(row);
+                }
+            });
+        </script>
+    </body>
+</html>
